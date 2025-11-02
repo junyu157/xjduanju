@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>短剧搜索 - 纯前端网盘转存平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            padding: 30px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+        
+        .search-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .search-box {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 50px 0 0 50px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            border-color: #3498db;
+        }
+        
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 0 50px 50px 0;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .popular-searches {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .popular-searches span {
+            background: #e0e0e0;
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .popular-searches span:hover {
+            background: #3498db;
+            color: white;
+        }
+        
+        .results-section {
+            display: none;
+        }
+        
+        .result-item {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+            border-left: 5px solid #3498db;
+        }
+        
+        .result-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .result-title {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .result-info {
+            display: flex;
+            justify-content: space-between;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .result-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .save-btn {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            flex: 1;
+            text-align: center;
+            text-decoration: none;
+        }
+        
+        .save-btn:hover {
+            background: #27ae60;
+            transform: translateY(-2px);
+        }
+        
+        .view-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            flex: 1;
+            text-align: center;
+            text-decoration: none;
+        }
+        
+        .view-btn:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+        
+        .instructions {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+        
+        .instructions h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 30px;
+            color: #7f8c8d;
+            display: none;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            input {
+                border-radius: 50px;
+                margin-bottom: 10px;
+            }
+            
+            button {
+                border-radius: 50px;
+            }
+            
+            .result-info {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-video"></i> 短剧搜索平台</h1>
+            <p class="subtitle">输入关键词，快速找到您想看的短剧观看</p>
+        </header>
+        
+        <section class="search-section">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="请输入短剧名称或关键词，例如：都市爱情、古装穿越...">
+                <button id="searchBtn"><i class="fas fa-search"></i> 搜索短剧</button>
+            </div>
+            
+            <p>热门搜索：</p>
+            <div class="popular-searches">
+                <span>霸道总裁</span>
+                <span>穿越古代</span>
+                <span>都市爱情</span>
+                <span>校园青春</span>
+                <span>悬疑探案</span>
+            </div>
+        </section>
+        
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p>正在搜索中，请稍候...</p>
+        </div>
+        
+        <div class="no-results" id="noResults">
+            <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 15px;"></i>
+            <h3>没有找到相关短剧</h3>
+            <p>请尝试使用其他关键词搜索</p>
+        </div>
+        
+        <section class="results-section" id="resultsSection">
+            <h2>搜索结果</h2>
+            <div class="result-list" id="resultList">
+                <!-- 搜索结果将动态生成 -->
+            </div>
+        </section>
+        
+        <section class="instructions">
+            <h3><i class="fas fa-info-circle"></i> 使用说明</h3>
+            <ol>
+                <li>在搜索框中输入您想看的短剧关键词</li>
+                <li>点击搜索按钮或按回车键进行搜索</li>
+                <li>从搜索结果中选择您感兴趣的短剧</li>
+                <li>点击"转存到网盘"按钮，系统将自动跳转到相应网盘页面</li>
+            </ol>
+        </section>
+        
+        <footer>
+            <p>© 2025 短剧搜索平台</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const searchBtn = document.getElementById('searchBtn');
+            const resultsSection = document.getElementById('resultsSection');
+            const resultList = document.getElementById('resultList');
+            const popularSearches = document.querySelectorAll('.popular-searches span');
+            const loading = document.getElementById('loading');
+            const noResults = document.getElementById('noResults');
+            
+            // 短剧数据库 - 存储在前端
+            const dramaDatabase = [
+                {
+                    id: 1,
+                    title: "霸道总裁爱上我",
+                    keywords: ["霸道总裁", "都市爱情", "职场"],
+                    type: "都市爱情",
+                    episodes: "24集",
+                    size: "2.5GB",
+                    netdiskLink: "https://pan.baidu.com/s/1abc123def",
+                    previewLink: "#",
+                    description: "职场小白与霸道总裁的浪漫爱情故事"
+                },
+                {
+                    id: 2,
+                    title: "穿越之王妃不好惹",
+                    keywords: ["穿越", "古装", "宫廷"],
+                    type: "古装穿越",
+                    episodes: "36集",
+                    size: "4.2GB",
+                    netdiskLink: "https://pan.baidu.com/s/2def456ghi",
+                    previewLink: "#",
+                    description: "现代女孩穿越古代成为王妃的逆袭之路"
+                },
+                {
+                    id: 3,
+                    title: "青春不散场",
+                    keywords: ["校园", "青春", "爱情"],
+                    type: "校园青春",
+                    episodes: "20集",
+                    size: "1.8GB",
+                    netdiskLink: "https://pan.baidu.com/s/3ghi789jkl",
+                    previewLink: "#",
+                    description: "大学校园里的青春爱情与成长故事"
+                },
+                {
+                    id: 4,
+                    title: "迷雾追踪",
+                    keywords: ["悬疑", "探案", "犯罪"],
+                    type: "悬疑探案",
+                    episodes: "30集",
+                    size: "3.5GB",
+                    netdiskLink: "https://pan.baidu.com/s/4jkl012mno",
+                    previewLink: "#",
+                    description: "警探追踪连环杀人案的悬疑故事"
+                },
+                {
+                    id: 5,
+                    title: "职场逆袭记",
+                    keywords: ["职场", "励志", "逆袭"],
+                    type: "职场励志",
+                    episodes: "28集",
+                    size: "3.2GB",
+                    netdiskLink: "https://pan.baidu.com/s/5mno345pqr",
+                    previewLink: "#",
+                    description: "职场新人逆袭成为行业精英的励志故事"
+                },
+                {
+                    id: 6,
+                    title: "总裁的契约娇妻",
+                    keywords: ["霸道总裁", "契约", "爱情"],
+                    type: "都市爱情",
+                    episodes: "32集",
+                    size: "3.8GB",
+                    netdiskLink: "https://pan.baidu.com/s/6pqr678stu",
+                    previewLink: "#",
+                    description: "契约婚姻演变成真爱的浪漫故事"
+                },
+                {
+                    id: 7,
+                    title: "古代农家女",
+                    keywords: ["穿越", "种田", "古代"],
+                    type: "古装穿越",
+                    episodes: "40集",
+                    size: "5.1GB",
+                    netdiskLink: "https://pan.baidu.com/s/7stu901vwx",
+                    previewLink: "#",
+                    description: "现代女孩穿越古代农家女的奋斗史"
+                },
+                {
+                    id: 8,
+                    title: "校园风云",
+                    keywords: ["校园", "青春", "友情"],
+                    type: "校园青春",
+                    episodes: "18集",
+                    size: "1.6GB",
+                    netdiskLink: "https://pan.baidu.com/s/8vwx234yza",
+                    previewLink: "#",
+                    description: "高中校园里的友情与成长故事"
+                },
+                {
+                    id: 9,
+                    title: "暗夜追凶",
+                    keywords: ["悬疑", "犯罪", "警匪"],
+                    type: "悬疑探案",
+                    episodes: "26集",
+                    size: "3.0GB",
+                    netdiskLink: "https://pan.baidu.com/s/9yza567bcd",
+                    previewLink: "#",
+                    description: "警探与高智商罪犯的斗智斗勇"
+                },
+                {
+                    id: 10,
+                    title: "创业时代",
+                    keywords: ["职场", "创业", "励志"],
+                    type: "职场励志",
+                    episodes: "34集",
+                    size: "4.0GB",
+                    netdiskLink: "https://pan.baidu.com/s/10bcd890efg",
+                    previewLink: "#",
+                    description: "年轻人创业追逐梦想的励志故事"
+                }
+            ];
+            
+            // 热门搜索标签点击事件
+            popularSearches.forEach(tag => {
+                tag.addEventListener('click', function() {
+                    searchInput.value = this.textContent;
+                    performSearch();
+                });
+            });
+            
+            // 搜索按钮点击事件
+            searchBtn.addEventListener('click', performSearch);
+            
+            // 回车键搜索
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+            
+            // 执行搜索函数
+            function performSearch() {
+                const keyword = searchInput.value.trim();
+                
+                if (!keyword) {
+                    alert('请输入搜索关键词');
+                    return;
+                }
+                
+                // 显示加载动画
+                loading.style.display = 'block';
+                resultsSection.style.display = 'none';
+                noResults.style.display = 'none';
+                
+                // 模拟搜索延迟
+                setTimeout(() => {
+                    // 执行前端搜索
+                    const results = searchDramas(keyword);
+                    
+                    // 隐藏加载动画
+                    loading.style.display = 'none';
+                    
+                    // 显示结果或提示无结果
+                    if (results.length > 0) {
+                        displayResults(results);
+                        resultsSection.style.display = 'block';
+                    } else {
+                        noResults.style.display = 'block';
+                    }
+                    
+                    // 滚动到结果区域
+                    if (results.length > 0 || noResults.style.display === 'block') {
+                        document.querySelector('.results-section, .no-results').scrollIntoView({ behavior: 'smooth' });
+                    }
+                }, 800); // 0.8秒延迟模拟搜索过程
+            }
+            
+            // 前端搜索函数
+            function searchDramas(keyword) {
+                const lowerKeyword = keyword.toLowerCase();
+                
+                return dramaDatabase.filter(drama => {
+                    // 搜索标题
+                    if (drama.title.toLowerCase().includes(lowerKeyword)) {
+                        return true;
+                    }
+                    
+                    // 搜索关键词
+                    if (drama.keywords.some(kw => kw.toLowerCase().includes(lowerKeyword))) {
+                        return true;
+                    }
+                    
+                    // 搜索类型
+                    if (drama.type.toLowerCase().includes(lowerKeyword)) {
+                        return true;
+                    }
+                    
+                    // 搜索描述
+                    if (drama.description.toLowerCase().includes(lowerKeyword)) {
+                        return true;
+                    }
+                    
+                    return false;
+                });
+            }
+            
+            // 显示搜索结果
+            function displayResults(results) {
+                // 清空之前的结果
+                resultList.innerHTML = '';
+                
+                // 添加新结果
+                results.forEach(result => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'result-item';
+                    
+                    resultItem.innerHTML = `
+                        <div class="result-title">${result.title}</div>
+                        <div class="result-info">
+                            <span><i class="fas fa-tag"></i> 类型：${result.type}</span>
+                            <span><i class="fas fa-film"></i> 集数：${result.episodes}</span>
+                            <span><i class="fas fa-hdd"></i> 大小：${result.size}</span>
+                        </div>
+                        <p style="color: #7f8c8d; margin-bottom: 15px;">${result.description}</p>
+                        <div class="result-actions">
+                            <a href="${result.netdiskLink}" target="_blank" class="save-btn"><i class="fas fa-cloud-upload-alt"></i> 转存到网盘</a>
+                            <a href="${result.previewLink}" target="_blank" class="view-btn"><i class="fas fa-play-circle"></i> 预览</a>
+                        </div>
+                    `;
+                    
+                    resultList.appendChild(resultItem);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
